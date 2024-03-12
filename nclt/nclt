@@ -1,0 +1,282 @@
+#!/bin/bash
+##### Ninn Command Line Tool #####
+# Author : Alexandre Ravaux 
+# @date:2015/06/26
+# @update:2017/03/02
+# @shell:bin/bash
+
+# Declaring an array of sentences for the easter eggs foxsays... 
+declare -a fox;
+fox=("Gering-ding-ding-ding-dingeringeding!" "Wa-pa-pa-pa-pa-pa-pow!" "Hatee-hatee-hatee-ho!" "Joff-tchoff-tchoffo-tchoffo-tchoff!" "Jacha-chacha-chacha-chow!" "Fraka-kaka-kaka-kaka-kow!" "A-oo-oo-oo-ooo!" "Wa-wa-way-do Wub-wid-bid-dum-way-do Wa-wa-way-do" "Bay-budabud-dum-bam" "Mama-dum-day-do" "Abay-ba-da bum-bum bay-do" "What does the fox say?");
+if [ $# -ne 0 ];then
+	if [ $# -ge 1 ];then
+		if [ "$1" == "-h" ] || [ "$1" == "-help" ]; then
+	  		echo "Usage: nclt <command> [<options>] [<args>] "
+	  		echo ""
+			echo "where <command> is one of:"
+			echo "    create, foxsays, tree, tuxsays, version"
+			echo ""
+			echo "nclt <cmd> -h     quick help on <cmd>"
+			echo "nclt -l           display full usage info"
+	  		exit 1
+	  	elif [[ "$1" == "-l" ]]; then
+	  		# statements
+	  		echo "Usage: nclt <command> [<options>] [<args>] "
+	  		echo ""
+			echo "where <command> is one of:"
+			echo ""
+			echo "    create      nclt create -ws <file name> to create a html page"
+			echo "                nclt create -mkdirws <repository name> to create a complete repository for your web project"
+			echo "    tree     	nclt tree <path> to view the content of the repository in a simple directory tree"
+			echo "    version     nclt version"
+			echo "                'nclt -v' or 'nclt --version' to print nclt version"
+			echo ""
+			echo "nclt <cmd> -h     quick help on <cmd>"
+			echo "nclt -l           display full usage info"
+		elif [ "$1" == "-v" ] || [ "$1" == "--version" ] || [ "$1" == "version" ]; then
+	  		echo "nclt version : 0.0-20170302"
+	  	#EASTER EGG 1
+	  	elif [ "$1" == "tuxsays" ]; then
+	  		# if the command is not neither followed by text nor options
+	  		if [ -z "$2" ]; then
+				echo " _______________"
+				echo "  Hello, world! "
+				echo " ---------------"
+				echo "   \\"
+				echo "    \\"
+				echo "        .--."
+				echo "       |o_o |"
+				echo "       |:_/ |"
+				echo "      //   \ \\"
+				echo "     (|     | )"
+				echo "    /\'\_   _/\`\\"
+				echo "    \___)=(___/"
+			elif [ "$2" == "-h" ] || [ "$2" == "-help" ] ; then
+	  			echo "This command is an Easter Egg !!"
+	  			echo ""
+	  			echo "nclt tuxsays <your message> (it would be better if you put your message between quotes)"
+	  			echo "e.g $ nclt tuxsays \"Hello you !\""
+			else
+				# Display a tux saying what you want him to say
+				echo " _______________"
+				echo -n "  "
+				echo $2 
+				echo " ---------------"
+				echo "   \\"
+				echo "    \\"
+				echo "        .--."
+				echo "       |o_o |"
+				echo "       |:_/ |"
+				echo "      //   \ \\"
+				echo "     (|     | )"
+				echo "    /\'\_   _/\`\\"
+				echo "    \___)=(___/"				
+			fi
+		#EASTER EGG 2
+		elif [ "$1" == "foxsays" ]; then
+	  		# if the command is not neither followed by text nor options
+	  		if [ -z "$2" ]; then
+				echo " __________________________"
+				echo "  What does the fox says ? "
+				echo " --------------------------"
+				echo "   \\"
+				echo "    \\"
+	  			echo "	    |\__/|"
+				echo "	   /     \\"
+				echo "	  /_.~ ~,_\\"  
+				echo "	     \@/"
+			elif [ "$2" == "-h" ] || [ "$2" == "-help" ] ; then
+	  			echo "This command is an Easter Egg !!"
+	  			echo ""
+	  			echo "nclt foxsays <your message> (it would be better if you put your message between quotes)"
+	  			echo "e.g $ nclt foxsays \"Hello you !\""
+	  			echo ""
+	  			echo "nclt foxsays random"
+	  		elif [ "$2" == "random" ]; then
+				# Display a fox saying a random sentence picked into the array fox[]
+				echo " __________________________"
+				echo -n "  "
+				echo ${fox[$(( ( RANDOM % 11 )  + 1 ))]} 
+				echo " --------------------------"
+				echo "   \\"
+				echo "    \\"
+	  			echo "	    |\__/|"
+				echo "	   /     \\"
+				echo "	  /_.~ ~,_\\"  
+				echo "	     \@/"	
+	  			
+			else
+				# Display a fox saying what you want him to say
+				echo " __________________________"
+				echo -n "  "
+				echo $2 
+				echo " --------------------------"
+				echo "   \\"
+				echo "    \\"
+	  			echo "	    |\__/|"
+				echo "	   /     \\"
+				echo "	  /_.~ ~,_\\"  
+				echo "	     \@/"			
+			fi	
+	  	elif [ "$1" == "create" ]; then
+	  		if [ "$2" == "-ws" ]; then
+	  			#TODO : test if it ends with ".html"
+	  			if [ ! -z "$3" ];then
+		  			# if the file already exists
+					if [ -f $3 ];then
+						echo "Uh oh, $3 already exists"
+						echo "Choose another file name :"
+						read a
+						$0 $1 $2 $a
+					# if it doesn't, then it creates the simple HTML file
+					else
+						echo '<!doctype html>'>$3
+						echo -e '<html>'>> $3
+						echo -e '\t<head>'>> $3
+						echo -e '\t\t<meta name="description" content="File generated with nclt">'>> $3
+						echo -e '\t\t<meta name="keywords" content="HTML,CSS,XML,JavaScript">'>> $3
+						echo -e '\t\t<meta name="author" content="John Doe">'>> $3
+						echo -e '\t\t<meta charset="UTF-8">'>> $3
+						echo -e '\t</head>'>> $3
+						echo -e '\t<body>'>> $3
+						echo -e '\t\t<p>Default' $3 'created</p>'>> $3
+						echo -e '\t</body>'>> $3
+						echo -e '</html>'>> $3
+						echo -n "Default "; echo -n $3; echo " created"
+						sleep 0.25;
+						#exit 0
+					fi
+				else
+					echo "It seems the file path has been forgotten."
+					echo "Please, see `basename $0` $1 -h (or `basename $0` $1 -help)"
+				fi
+			elif [ "$2" == "-mkdirws" ]; then
+				if [ ! -z "$3" ];then
+					if [ -d $3 ];then
+						echo "$3 already exists"
+						echo choisissez un autre nom de fichier :
+						read a
+						$0 create -mkdirws $a
+					else
+						# Create some repo for css, js and pics files
+						mkdir -p $3/media/css/../js/../img
+						echo "Empty media repository created"
+						sleep 0.25;
+						echo "Empty css/ repository created"
+						sleep 0.25;
+						echo "Empty js/ repository created"
+						sleep 0.25;
+						echo "Empty img/ repository created"
+						sleep 0.25;
+						#Add the files
+						touch $3/media/css/style.css
+						echo "Empty css file created"
+						sleep 0.25;
+						touch $3/media/js/script.js
+						echo "Empty javascript script created"
+						sleep 0.25;
+						# Create the index.html including the css and js file in the <head>
+						echo '<!doctype html>'>$3/index.html
+						echo -e '<html>'>> $3/index.html
+						echo -e '\t<head>'>> $3/index.html
+						echo -e '\t\t<meta name="description" content="File generated with nclt">'>> $3/index.html
+						echo -e '\t\t<meta name="keywords" content="HTML,CSS,XML,JavaScript">'>> $3/index.html
+						echo -e '\t\t<meta name="author" content="John Doe">'>> $3/index.html
+						echo -e '\t\t<meta charset="UTF-8">'>> $3/index.html
+						echo -e '\t\t<link rel="stylesheet" href="media/css/style.css">'>> $3/index.html
+						echo -e '\t\t<script type="text/javascript" src="media/js/script.js"></script>'>> $3/index.html
+						echo -e '\t</head>'>> $3/index.html
+						echo -e '\t<body>'>> $3/index.html
+						echo -e '\t\t<p>Default' $3/index.html 'created</p>'>> $3/index.html
+						echo -e '\t</body>'>> $3/index.html
+						echo -e '</html>'>> $3/index.html
+						echo "Default index.html created"
+						sleep 0.25;
+						$0 tree $3
+						sleep 0.25;
+					fi
+				else
+					echo "It seems the repository name has been forgotten."
+					echo "Please, see `basename $0` $1 -h (or `basename $0` $1 -help)"
+				fi
+	  		elif [ "$2" == "-h" ] || [ "$2" == "-help" ] ; then
+	  			echo "The command allows you to create a file or a repository"
+	  			echo ""
+	  			echo "Here the valid options :"
+	  			echo "	-ws <path> : create a simple html file in the path given"
+	  			echo "	-mkdirws <repository name>: create a complete repository for your web project"
+	  			echo "Tree structure of the complete repository :"
+	  			echo "<repository name>"
+				echo "├─ index.html"
+				echo "└─ media/"
+				echo "   ├─ css/"
+				echo "   │  └─ style.css"
+				echo "   ├─ img/"
+				echo "   └─ js/"
+				echo "       └─ script.js"
+	  		else
+	  			echo "`basename $0` $1 -help or  `basename $0` $1 -h to know more about this command"
+	  		fi
+	  	elif [ "$1" == "tree" ]; then
+	  		if [ "$2" == "-h" ] || [ "$2" == "-help" ] ; then
+	  			echo "The command allows you to view the repository in a simple directory tree"
+	  			echo "nclt tree <path>"		
+	  		elif [ ! -z "$2" ];then
+	  			if [ "$2" == "." ];then
+					find $2 -print | sed -e "s;[^/]*\/;|__;g;s;__|;  ;g;s;| ;  ;g;s; __;  |__;g"	
+				elif [ "$2" == ".." ];then
+					find $2 -print | sed -e "s;[^/]*\/;|__;g;s;__|;  ;g;s;| ;  ;g;s; __;  |__;g"	
+				else
+					find $2 -print | sed -e "s;$2;\.;g;s;[^/]*\/;|__;g;s;__|;  ;g;s;| ;  ;g;s; __;  |__;g"	
+				fi
+			else
+				echo "Uncorrect usage of the Ninn Command Line Tool"
+				echo "`basename $0` -help or  `basename $0` -h to know more about this command"
+				exit 1
+			fi
+		elif [ "$1" == "size" ]; then
+	  		if [ "$2" == "-h" ] || [ "$2" == "-help" ] ; then
+	  			echo "The command allows you to view the repository in a simple directory tree"
+	  			echo "nclt tree <path>"		
+	  		elif [ ! -z "$2" ];then
+					du -sh /Volumes/Docs/
+			else
+				echo "Uncorrect usage of the Ninn Command Line Tool"
+				echo "`basename $0` -help or  `basename $0` -h to know more about this command"
+				exit 1
+			fi
+		elif [[ $1 == @* ]]; then
+			echo "TODO"
+			if [[ $1 == @search ]]; then
+				#statements
+				echo "TODO @search"
+				# @search file
+				# @search 
+			fi
+			
+	  	else
+	  		# Big problem, normally you should not have this error message
+	  		echo "Well, a problem occurs."
+	  		echo "See if you didn't make a mistake in your command by looking at the help (nclt -h)"
+	  		echo "If you think there should be no problem, report the bug. Thank you very much."
+	  		exit 2
+		fi
+	else
+		echo "Uncorrect usage of the Ninn Command Line Tool"
+		echo "`basename $0` -help or  `basename $0` -h to know more about this command"
+		exit 1
+	fi
+else
+	# if you just type nclt
+	echo "Usage: nclt <command> [<options>] [<args>] "
+	echo ""
+	echo "where <command> is one of:"
+	echo "    create, foxsays, tree, tuxsays, version"
+	echo ""
+	echo "nclt <cmd> -h     quick help on <cmd>"
+	echo "nclt -l           display full usage info"
+	echo ""
+	echo "--"
+	echo "nclt created by Alexandre Ravaux - v.20170302"
+	exit 1
+fi
