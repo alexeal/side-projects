@@ -1,0 +1,233 @@
+#!/bin/bash
+#####################################################
+# ACLT: Alexeal's Command-Line Tool                 #
+# @author:alexeal                                   #
+# @date:2024/05/16                                  #
+# @shell:bin/bash                                   #
+# @license:MIT License (MIT)                        #
+#####################################################
+RED='\033[0;31m'
+NC='\033[0m' 
+clean_dot(){
+	sudo find . -name "._*" -type f -delete
+}
+is_file(){
+    [[ -n "$1" ]] && [[ -f "$1" ]] && return 0 || return 1
+}
+is_a_file_or_directory(){
+    [[ -n "$1" ]] && [[ -d "$1" ]] && [[ -f "$1" ]] && return 0 || return 1
+}
+is_directory(){
+    [[ -n "$1" ]] && [[ -d "$1" ]] && return 0 || return 1
+}
+is_empty(){
+	[[ -z "$1" ]] && return 0 || return 1
+}
+is_not_empty(){
+	[[ -n "$1" ]] && return 0 || return 1
+}
+has_options() {
+	[[ "$1" -ge 1 ]] && return 0 || return 1
+}
+has_args(){
+	[[ "$1" -ne 0 ]] && return 0 || return 1
+}
+seek_help(){
+	echo -e "${RED}Error: Invalid command. Type aclt --help to seek for proper usage.${NC}"
+}
+usage(){
+	echo "Usage: aclt [options]"
+	echo "Options:"
+	echo "--extract <archive>                             extract archive"
+	echo "Alternative: -e <archive>"
+	echo "Supported files: zip, 7zip, tar and epub"
+	echo "Warning: 7zip requires 7zip tools (e.g: p7zip)"
+	echo ""
+	echo "--create --epub <directory>                     create an epub from the given directory"
+	echo "Alternative: -c -e <directory>"
+	echo ""
+	echo "--create --secret-zip <file|directory>          create zip with a password"
+	echo "Alternative: -sz <file|directory>"
+	echo ""
+    echo "--help                                          print help and exit"
+    echo "--version                                       print version and exit"
+    echo "-l                                              print license and exit"
+    echo ""
+    echo "Dependencies: The software requires another softwares such as zip (nfo-ZIP) and 7zip for compressing options."
+	echo "It is the user's responsibility to install the required softwares."
+	echo ""
+	echo "Report bugs to: chillncode@gmail.com"
+	echo "aclt - 20240516_0.0.1"
+}
+license(){
+	echo 'The MIT License (MIT)
+	Copyright (c) 2024 Alexandre Ravaux/alexeal
+	Permission is hereby granted, free of charge, to any person obtaining a copy
+	of this software and associated documentation files (the "Software"), to deal
+	in the Software without restriction, including without limitation the rights
+	to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+	copies of the Software, and to permit persons to whom the Software is
+	furnished to do so, subject to the following conditions:
+	The above copyright notice and this permission notice shall be included in
+	all copies or substantial portions of the Software.
+	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+	IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+	FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+	AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+	LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+	THE SOFTWARE.'
+	echo "Source: http://opensource.org/licenses/MIT"
+	echo "Even if the software requires another softwares to be pre installed, the software does not embed any dependencies."
+}
+version(){
+	echo "Copyright (c) Alexandre Ravaux aka alexeal - MIT License."
+	echo "ACLT: Alexeal's Command-Line Tool"
+	echo "aclt 0.0.1 (May 16th 2024)."
+	echo "Usage: aclt [-options]"
+	echo "Type aclt --help or aclt -h to have detailed usage of aclt."
+}
+# create a zip with a password
+cram () {
+     if is_a_file_or_directory "$1"; then
+         zip -re "$1".zip "$1"
+     else
+     	if is_empty "$1";then
+     		echo -e "${RED}Error: A valid filename is required.${NC}"
+     	else
+         	echo -e "${RED}Error: '$1' not a valid folder nor a valid file.${NC}"
+		fi
+     fi
+}
+# unzip epub file
+# usage unzip_epub <book name with epub extension> 
+unzip_epub(){
+  if has_args $#;then
+    if [[ $1 == *.epub ]]; then
+      local folder_name="${1%%.*}" # get name without extension
+      cp "$1" "$folder_name".zip # bash cannot unzip epub directly
+      unzip -oq "$folder_name".zip -d "./${folder_name}"
+      # ZIP options
+      # -o : force rewriting
+      # -q : don't display whole process
+      # -d : unzip in given folder
+      rm -f "$folder_name".zip
+    fi
+  else
+    echo -e "${RED}An error occured.${NC}"
+  fi
+}
+# zip to epub
+# usage: zipbk <book name> <mimetype file>
+zip_epub(){
+    if has_args $#;then
+        if is_not_empty "$1" && is_file "$2";then
+            local book=$1
+            local mimetype_file=$$2
+            # ZIP Options:
+            # -x   exclude file
+            # -r   recurse into directories
+            # -D   do not add directory entries
+            # -9   compress better
+            # -X   eXclude eXtra file attributes
+            # -0   store only 
+            zip -rX0 "$book" "$mimetype_file"
+            zip -rDX9 "$book" ./* -x "*.DS_Store" -x "$mimetype_file"
+        else
+            echo -e "${RED}An error occured while packing the epub.${NC}"   
+        fi     
+    fi
+}
+# create an epub
+create_epub(){
+    local current_path
+    current_path=$(pwd)
+    echo -n "Name of your ebook: "
+    read -r book_name
+    echo -n "Path to the book folders and files: "
+    read -r book_path
+    if [ -n "${book_path}" ] && [ -d "$book_path" ];then
+        cd "$book_path" || return
+        clean_dot # remove macOS ._ files
+        if [ -n "${book_name}" ];then
+            local book=$book_name.epub
+            rm -f "$book"
+        else
+            echo -e "${RED}A book name is required.${NC}"
+        fi
+        mimetype_file=$(find . -name "mimetype")
+        if is_file "$mimetype_file";then
+            zip_epub "$book" "$mimetype_file"
+            mv "$book" "$current_path"/"$book"
+            cd "$current_path" || return
+        else
+            echo -e "${RED}A mimetype file is required.${NC}"         
+            echo "Please check if your folder contains the mimetype file."
+        fi        
+    else
+        echo -e "${RED}A path to the book files is required.${NC}"
+        echo "Please check the path given."
+    fi    
+}
+# extract filde/folder
+extract () {
+     if is_file "$1"  ; then
+         case "$1" in
+             *.tar.bz2)   tar xjf "$1"     ;;
+             *.tar.gz)    tar xzf "$1"     ;;
+             *.bz2)       bunzip2 "$1"     ;;
+             *.rar)       rar x "$1"       ;;
+             *.gz)        gunzip "$1"      ;;
+             *.tar)       tar xf "$1"      ;;
+             *.tbz2)      tar xjf "$1"     ;;
+             *.tgz)       tar xzf "$1"     ;;
+             *.zip)       unzip "$1"       ;;
+             *.epub)      unzip_epub "$1"  ;; # caution: requires a homemade small function unzipping epub
+             *.Z)         uncompress "$1"  ;;
+             *.7z)        7z x "$1".       ;;
+             *)           echo -e "${RED}'$1' cannot be extracted.${NC}" ;;
+         esac
+     else
+     	if is_empty "$1";then
+     		echo -e "${RED}Error: A valid filename is required.${NC}"
+     	else
+         	echo -e "${RED}Error: '$1' is not a valid file.${NC}"
+		fi
+     fi
+}
+
+# COMMAND CALLS
+if has_options $#
+then
+	if [ "$1" = "--extract" ] || [ "$1" = "-e" ]
+	then
+	    extract "$2"
+	elif [ "$1" = "--create" ] || [ "$1" = "-c" ]
+	then
+	    if [ "$2" = "--epub" ] || [ "$2" = "-e" ]
+	    then
+	    	create_epub
+	    elif [ "$2" = "--secret-zip" ] 
+	    then
+	    	cram "$3"
+	    else
+	    	seek_help
+	    fi
+	elif [ "$1" = "-sz" ] # sz as secret zip
+	then
+	    cram "$2"
+	elif [ "$1" = "-l" ]
+	then
+	    license
+	elif [ "$1" = "--version" ] || [ "$1" = "-v" ]
+	then
+	    version
+	elif [ "$1" = "--help" ] || [ "$1" = "-h" ]
+	then
+	    usage
+	else
+		seek_help
+	fi
+else
+	usage
+fi
