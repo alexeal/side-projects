@@ -32,6 +32,9 @@ has_options() {
 has_args(){
 	[[ "$1" -ne 0 ]] && return 0 || return 1
 }
+has_validated(){
+	[ "$1" = "y" ] || [ "$1" = "yes" ] || [ "$1" = "yeah" ] && return 0 || return 1;
+}
 seek_help(){
 	echo -e "${RED}Error: Invalid command. Type aclt --help to seek for proper usage.${NC}"
 }
@@ -48,6 +51,10 @@ usage(){
 	echo ""
 	echo "--create --secret-zip <file|directory>          create zip with a password"
 	echo "Alternative: -sz <file|directory>"
+	echo ""
+	echo "--remove <filename>                             remove recursively file having given filename"
+	echo "Alternative: -rm <filename>"
+	echo "Warning: filename must be a string"
 	echo ""
     echo "--help                                          print help and exit"
     echo "--version                                       print version and exit"
@@ -195,8 +202,26 @@ extract () {
 		fi
      fi
 }
+#recursively remove given filename
+removefile() {
+	# check if $1 contains * and add some warning before executing command
+	choice="y" # default value
+	if [ -n "$1" ];then
+		if [[ "$1" == *"*"* ]]; then 
+			echo -e "${RED}You're using a wildcard (*), are you sure to remove $1 ?${NC} [y/n]"
+			read -p choice
+		fi
+		choice="$(echo "$choice" | tr '[:upper:]' '[:lower:]')"
+		if has_validated "$choice";then
+			find . -name "$1" -type f -delete
+		else
+			echo -e "${RED}Aborting removal.${NC}"
+		fi
+	fi
+}
 
 # COMMAND CALLS
+# TODO: a switch case instead?
 if has_options $#
 then
 	if [ "$1" = "--extract" ] || [ "$1" = "-e" ]
@@ -216,6 +241,9 @@ then
 	elif [ "$1" = "-sz" ] # sz as secret zip
 	then
 	    cram "$2"
+	elif [ "$1" = "-rm" ] || [ "$1" = "--remove" ]
+	then
+	    removefile "$2"
 	elif [ "$1" = "-l" ]
 	then
 	    license
