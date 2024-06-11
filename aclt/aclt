@@ -113,11 +113,11 @@ unzip_epub(){
     if [[ $1 == *.epub ]]; then
       local folder_name="${1%%.*}" # get name without extension
       cp "$1" "$folder_name".zip # bash cannot unzip epub directly
-      unzip -oq "$folder_name".zip -d "./${folder_name}"
-      # ZIP options
+      # UNZIP options:
       # -o : force rewriting
       # -q : don't display whole process
       # -d : unzip in given folder
+      unzip -oq "$folder_name".zip -d "./${folder_name}"
       rm -f "$folder_name".zip
     fi
   else
