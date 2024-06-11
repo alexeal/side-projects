@@ -121,7 +121,7 @@ unzip_epub(){
       rm -f "$folder_name".zip
     fi
   else
-    echo -e "${RED}An error occured.${NC}"
+    echo -e "${RED}An error occurred.${NC}"
   fi
 }
 # zip to epub
@@ -141,7 +141,7 @@ zip_epub(){
             zip -rX0 "$book" "$mimetype_file"
             zip -rDX9 "$book" ./* -x "*.DS_Store" -x "$mimetype_file"
         else
-            echo -e "${RED}An error occured while packing the epub.${NC}"   
+            echo -e "${RED}An error occurred while packing the epub.${NC}"   
         fi     
     fi
 }
