@@ -3,9 +3,11 @@
 **aclt** stands for **A**lexeal's **C**ommand-**L**ine **T**ool. I know, I know, I've searched far and wide to find a name for my script... Anyways, I wanted to do a script to ease some commands. I'll update the script as far as I'll find some new feature to add to.
 
 ## How to use the script 
-
+Once the file cloned or download, you can either execute it locally (meaning hereby executing within the downloading folder) or execute it at more globally scale.
 ### 1) Executing the script locally
-`chmod 755 aclt` will make the file executable. Then in your terminal, you juste do : `./aclt <option>`
+To make it executable: `chmod 755 aclt`
+
+To execute: `./aclt [option]` (check help page to seek for proper option)
 ### 2) Executing the script as a "standalone"
 Execute those commands (`sudo` might be required): 
 ``` console
@@ -14,6 +16,8 @@ cd /usr/local/bin
 chmod 755 aclt 
 ```
 Then reboot the terminal app and you'll be able to use `aclt` on your terminal **everywhere**.
+
+> **Note:** I haven't tested on Windows (with cygwin or git-bash), do not hesitate to tell me how to make it works on Windows.
 ## Help page
 ``` console
 Usage: aclt [options]
